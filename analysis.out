@@ -1,0 +1,12 @@
+all buses: 1794
+moving buses 64268
+speeding buses14497
+
+licbza: 28032, czas opoznien: 3007976, srednia: 107.3050799086758
+5 Lines with biggest average delays:
+Line L42: avg. delay: 827.0s
+Line L-6: avg. delay: 758.0s
+Line L39: avg. delay: 709.0s
+Line 221: avg. delay: 638.0s
+Line L52: avg. delay: 574.0s
+
