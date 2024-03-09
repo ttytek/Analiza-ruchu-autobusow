@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import json
 
-data_path = 'vehicle_data_evening.json'
+data_path = 'vehicle_data_new.json'
 timetable_path = 'przystanki.json'
 time_format = '%Y-%m-%d %H:%M:%S'
 max_lat = 52.5
@@ -36,7 +36,6 @@ def add_to_heatmap(map, lat, lon):
 
     if (int(a) < heatmap_resolution) & (int(b) < heatmap_resolution) & (int(a) >= 0) & (int(b) >= 0):
         map[int(a)][int(b)] += 1
-
 
 
 def show_heatmap(heatmap, name):
@@ -143,15 +142,13 @@ def analyze_delays(vehicle_data, timetable, results):
                 delay = prev_time_seconds - int(arrival_times[next_stop_idx])
                 #if bus is earlier than 2 minutes before planned time, assume the data is incorrect and don't count
                 if delay > -120:
-                    if (coord_time["Lines"]) in results['opoznienia_lini']:
-                        results['opoznienia_lini'][coord_time['Lines']].append(delay)
+                    if (coord_time["Lines"]) in results['delays_by_line']:
+                        results['delays_by_line'][coord_time['Lines']].append(delay)
                     else:
-                        results['opoznienia_lini'][coord_time['Lines']] = [delay]
+                        results['delays_by_line'][coord_time['Lines']] = [delay]
                     dist_from_stop_prev = dist_from_stop_prev.km
-
-                    results['odl'] += int(dist_from_stop_prev)
-                    results['czas'] += prev_time_seconds - int(arrival_times[next_stop_idx])
-                    results['liczba_op'] += 1
+                    results['time'] += prev_time_seconds - int(arrival_times[next_stop_idx])
+                    results['num_of_delays'] += 1
                     next_stop_idx += 1
             except IndexError as e:
                 break
@@ -164,10 +161,10 @@ def analyze_delays(vehicle_data, timetable, results):
 def show_delays_results(results):
     avg_delays = {}
     print(
-        f'licbza: {results["liczba_op"]}, czas opoznien: {results["czas"]},'
-        f' srednia: {results["czas"] / results["liczba_op"]}')
-    for el in results['opoznienia_lini']:
-        avg_delays[el] = np.mean(results['opoznienia_lini'][el])
+        f'Number of delayed arrivals: {results["num_of_delays"]}, sum of delays: {results["time"]},'
+        f' average delay: {results["time"] / results["num_of_delays"]}')
+    for el in results['delays_by_line']:
+        avg_delays[el] = np.mean(results['delays_by_line'][el])
     sorted_delays=sorted(avg_delays.items(), key=lambda item: item[1], reverse=True)
     top_delays = sorted_delays[:5]
     print("5 Lines with biggest average delays:")
@@ -183,8 +180,8 @@ with open(timetable_path, 'r') as file:
 
 
 speeding_data = {'all': 0, 'moving': 0, 'speeding': 0, 'buses_pos': ([], []), 'speeding_pos': ([], []),
-                 'all_heatmap': np.ones((21, 21)), 'speeding_heatmap': np.zeros((21, 21))}
-delays_data = {'all': 0, 'odl': 0, 'czas': 0, 'liczba_op': 0, 'opoznienia_lini': {}}
+                 'all_heatmap': np.ones((heatmap_resolution, heatmap_resolution)), 'speeding_heatmap': np.zeros((heatmap_resolution, heatmap_resolution))}
+delays_data = {'all': 0, 'time': 0, 'num_of_delays': 0, 'delays_by_line': {}}
 for vehicle_data in data:
     analyze_speeding(data[vehicle_data], speeding_data)
     bus_id = hash_bus(data[vehicle_data][0]['Lines'], data[vehicle_data][0]['Brigade'])
