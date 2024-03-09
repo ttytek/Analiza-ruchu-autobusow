@@ -11,6 +11,7 @@ max_lat = 52.5
 min_lat = 51.9
 max_lon = 21.5
 min_lon = 20.4
+heatmap_resolution = 100
 
 
 #check if bus coordinates are resonable
@@ -18,23 +19,24 @@ def correct_data(coords):
 
     if coords is None:
         return False
-    if abs(coords['Lon']) > 60:
+    if abs(coords['Lon']) > max_lon:
         return False
-    if abs(coords['Lat']) > 60:
+    if abs(coords['Lat']) > max_lat:
         return False
-    if abs(coords['Lon']) < 20:
+    if abs(coords['Lon']) < min_lon:
         return False
-    if abs(coords['Lat']) < 20:
+    if abs(coords['Lat']) < min_lat:
         return False
     return True
 
 #used for creating a heatmap to visualize data
 def add_to_heatmap(map, lat, lon):
-    a = int((lat - min_lat) // 0.03)
-    b = int((lon - min_lon) // 0.045)
+    a = int((lat - min_lat) // ((max_lat - min_lat) / heatmap_resolution))
+    b = int((lon - min_lon) // ((max_lon - min_lon) / heatmap_resolution))
 
-    if (int(a) < 21) & (int(b) < 21) & (int(a) >= 0) & (int(b) >= 0):
+    if (int(a) < heatmap_resolution) & (int(b) < heatmap_resolution) & (int(a) >= 0) & (int(b) >= 0):
         map[int(a)][int(b)] += 1
+
 
 
 def show_heatmap(heatmap, name):
